@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Доставка</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #f3f4f6;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      padding: 15px;
+      background: white;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+
+    main { flex: 1; overflow-y: auto; padding: 10px; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* Главное меню */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .menu-item {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .menu-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+    }
+
+    /* Карточки товаров */
+    .product {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .product img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .product-title { font-weight: 600; margin-top: 10px; }
+    .product-price { color: #2ea6ff; font-weight: bold; }
+
+    .btn {
+      background: #2ea6ff;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    /* Корзина */
+    .cart-item {
+      background: white;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    }
+
+    .red-btn {
+      background: #ff5252 !important;
+    }
+
+    .empty { text-align: center; color: #888; margin-top: 40px; }
+
+    nav {
+      display: none; /* навигация скрыта — всё выбирается через главное меню */
+    }
+  </style>
+</head>
+
+<body>
+  <header id="header-title">Главное меню</header>
+
+  <main>
+    <!-- Главное меню -->
+    <section id="home" class="section active">
+      <div class="menu-grid">
+        <div class="menu-item" onclick="openPage('catalog')">Каталог</div>
+        <div class="menu-item" onclick="openPage('cart')">Корзина</div>
+        <div class="menu-item" onclick="openPage('sales')">Акции</div>
+        <div class="menu-item" onclick="openPage('orders')">Заказы</div>
+        <div class="menu-item" onclick="openPage('profile')" style="grid-column: span 2;">Профиль</div>
+      </div>
+    </section>
+
+    <!-- Каталог -->
+    <section id="catalog" class="section">
+      <div class="product">
+        <img src="https://i.imgur.com/pizza1.jpg">
+        <div class="product-title">Пицца Маргарита</div>
+        <div class="product-price">2000 ₸</div>
+        <button class="btn" onclick="addToCart('Пицца Маргарита', 2000)">Добавить</button>
+      </div>
+
+      <div class="product">
+        <img src="https://i.imgur.com/pizza2.jpg">
+        <div class="product-title">Пицца Пепперони</div>
+        <div class="product-price">2400 ₸</div>
+        <button class="btn" onclick="addToCart('Пицца Пепперони', 2400)">Добавить</button>
+      </div>
+
+      <div class="product">
+        <img src="https://i.imgur.com/drink1.jpg">
+        <div class="product-title">Кола 0.5л</div>
+        <div class="product-price">600 ₸</div>
+        <button class="btn" onclick="addToCart('Кола 0.5л', 600)">Добавить</button>
+      </div>
+
+      <button class="btn" style="margin-top:20px;background:#ccc;" onclick="openPage('home')">← Назад</button>
+    </section>
+
+    <!-- Корзина -->
+    <section id="cart" class="section">
+      <div id="cart-items"></div>
+      <div id="cart-total" style="font-weight:bold;margin-top:15px;"></div>
+      <button id="checkout-btn" class="btn" style="margin-top:10px;display:none;">Оформить заказ</button>
+
+      <button class="btn" style="margin-top:20px;background:#ccc;" onclick="openPage('home')">← Назад</button>
+    </section>
+
+    <!-- Акции -->
+    <section id="sales" class="section">
+      <div class="product">
+        <img src="https://i.imgur.com/sale.jpg">
+        <div class="product-title">🔥 2 пиццы + напиток = скидка 20%</div>
+        <p>Только до конца недели</p>
+      </div>
+
+      <button class="btn" style="margin-top:20px;background:#ccc;" onclick="openPage('home')">← Назад</button>
+    </section>
+
+    <!-- Заказы -->
+    <section id="orders" class="section">
+      <p class="empty">Пока нет заказов</p>
+      <button class="btn" style="margin-top:20px;background:#ccc;" onclick="openPage('home')">← Назад</button>
+    </section>
+
+    <!-- Профиль -->
+    <section id="profile" class="section">
+      <p><b>Ваш профиль</b></p>
+      <p id="user-name">Имя: Гость</p>
+      <p>Здесь будут адреса, бонусы и настройки.</p>
+
+      <button class="btn" style="margin-top:20px;background:#ccc;" onclick="openPage('home')">← Назад</button>
+    </section>
+  </main>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    function openPage(id) {
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+
+      // Заголовок
+      const titles = {
+        home: "Главное меню",
+        catalog: "Каталог",
+        cart: "Корзина",
+        sales: "Акции",
+        orders: "Заказы",
+        profile: "Профиль"
+      };
+      document.getElementById("header-title").textContent = titles[id];
+
+      if (id === "cart") updateCart();
+    }
+
+    function addToCart(name, price) {
+      cart.push({ name, price });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      tg.HapticFeedback.notificationOccurred("success");
+    }
+
+    function updateCart() {
+      const container = document.getElementById("cart-items");
+      const totalEl = document.getElementById("cart-total");
+      const checkoutBtn = document.getElementById("checkout-btn");
+
+      container.innerHTML = "";
+      if (cart.length === 0) {
+        container.innerHTML = "<p class='empty'>Корзина пуста</p>";
+        checkoutBtn.style.display = "none";
+        totalEl.textContent = "";
+        return;
+      }
+
+      let total = 0;
+      cart.forEach((item, i) => {
+        total += item.price;
+        container.innerHTML += `
+          <div class="cart-item">
+            ${item.name} — ${item.price} ₸
+            <button class="btn red-btn" onclick="removeFromCart(${i})">Удалить</button>
+          </div>`;
+      });
+
+      totalEl.textContent = "Итого: " + total + " ₸";
+      checkoutBtn.style.display = "block";
+      checkoutBtn.onclick = () => {
+        tg.sendData(JSON.stringify({ action: "order", items: cart, total }));
+        tg.close();
+      };
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      updateCart();
+    }
+
+    document.getElementById("user-name").textContent =
+      "Имя: " + (tg.initDataUnsafe?.user?.first_name || "Гость");
+  </script>
+</body>
+</html>
